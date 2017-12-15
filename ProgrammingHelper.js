@@ -108,7 +108,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
 
 client.on('message', function(message) {
     if (!message.author.bot) {
-        if (message.channel.name === jsChannel) { // python interpreter channel
+        if (message.channel.name === jsChannel) {
             var content = message.content.replace(/`/g, '');
             var lines = content.split("\n");
 
