@@ -20,8 +20,8 @@ client.on('messageReactionAdd', function(messageReaction, user) {
             if (type === "js") {
                 message.channel.send(new Function(stripped)());
             } else if (type === "cpp") {
-                var filePath = '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc.cpp';
-                fs.writeFileSync(filePath,
+                var cppFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc.cpp';
+                fs.writeFileSync(cppFilePath,
                     "#include <iostream>\n" +
                     "using namespace std;\n" +
                     "int main() {\n" +
@@ -29,13 +29,13 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                     "return 0;\n" +
                     "}");
 
-                var compiler = child_process.spawn('g++', ['-Wall', '-Wno-c++11-extensions', filePath, '-o', '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc']);
+                var compiler = child_process.spawn('g++', ['-Wall', '-Wno-c++11-extensions', cppFilePath, '-o', '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc']);
 
-                compiler.stderr.on('data', function(comp_stdout) {
+                compiler.stderr.on('data', function (comp_stdout) {
                     message.channel.send(comp_stdout.toString().trim());
                 });
 
-                compiler.on('close', function(code) {
+                compiler.on('close', function (code) {
                     if (code !== 1) {
                         currentFunction = child_process.spawn('/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc');
                         currentFunction.stdout.on('data', function (stdout) {
@@ -43,11 +43,41 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                             message.channel.send(out);
                         });
 
-                        currentFunction.on('close', function(code) {
+                        currentFunction.on('close', function (code) {
                             currentFunction = -1;
                         });
                     }
                 });
+            } else if (type === "c") {
+                var cFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/c.c';
+                fs.writeFileSync(cFilePath,
+                    "#include <stdio.h>\n" +
+                    "#include <stdlib.h>\n" +
+                    "int main() {\n" +
+                    stripped + "\n" +
+                    "return 0;\n" +
+                    "}");
+
+                var compiler = child_process.spawn('gcc', ['-Wall', cFilePath, '-o', '/Users/goatgoose/W/DiscordProgrammingHelper/c']);
+
+                compiler.stderr.on('data', function(comp_stdout) {
+                   message.channel.send(comp_stdout.toString().trim());
+                });
+
+                compiler.on('close', function(code) {
+                    if (code !== 1) {
+                        currentFunction = child_process.spawn('/Users/goatgoose/W/DiscordProgrammingHelper/c');
+                        currentFunction.stdout.on('data', function (stdout) {
+                            var out = stdout.toString().trim();
+                            message.channel.send(out);
+                        });
+
+                        currentFunction.on('close', function (code) {
+                            currentFunction = -1;
+                        });
+                    }
+                });
+
             } else if (type === "py") {
                 var pyFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/py.py';
                 fs.writeFileSync(pyFilePath, stripped);
