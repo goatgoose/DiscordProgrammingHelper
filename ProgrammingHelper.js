@@ -5,6 +5,8 @@ const child_process = require('child_process');
 
 client.login('MzAyOTI5MjcxMTU0ODAyNjg4.DRSBPA.EBz8dKfI6d9uKI0eYGHYUQDhl28');
 
+var workingDirectory = '/Users/goatgoose/W/DiscordProgrammingHelper/';
+
 var currentFunction = -1;
 
 client.on('messageReactionAdd', function(messageReaction, user) {
@@ -20,7 +22,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
             if (type === "js") {
                 message.channel.send(new Function(stripped)());
             } else if (type === "cpp") {
-                var cppFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc.cpp';
+                var cppFilePath = workingDirectory + 'cppFunc.cpp';
                 fs.writeFileSync(cppFilePath,
                     "#include <iostream>\n" +
                     "using namespace std;\n" +
@@ -29,7 +31,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                     "return 0;\n" +
                     "}");
 
-                var compiler = child_process.spawn('g++', ['-Wall', '-Wno-c++11-extensions', cppFilePath, '-o', '/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc']);
+                var compiler = child_process.spawn('g++', ['-Wall', '-Wno-c++11-extensions', cppFilePath, '-o', workingDirectory + 'cppFunc']);
 
                 compiler.stderr.on('data', function (comp_stdout) {
                     message.channel.send(comp_stdout.toString().trim());
@@ -37,7 +39,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
 
                 compiler.on('close', function (code) {
                     if (code !== 1) {
-                        currentFunction = child_process.spawn('/Users/goatgoose/W/DiscordProgrammingHelper/cppFunc');
+                        currentFunction = child_process.spawn(workingDirectory + 'cppFunc');
                         currentFunction.stdout.on('data', function (stdout) {
                             var out = stdout.toString().trim();
                             message.channel.send(out);
@@ -49,7 +51,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                     }
                 });
             } else if (type === "c") {
-                var cFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/c.c';
+                var cFilePath = workingDirectory + 'c.c';
                 fs.writeFileSync(cFilePath,
                     "#include <stdio.h>\n" +
                     "#include <stdlib.h>\n" +
@@ -58,7 +60,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                     "return 0;\n" +
                     "}");
 
-                var compiler = child_process.spawn('gcc', ['-Wall', cFilePath, '-o', '/Users/goatgoose/W/DiscordProgrammingHelper/c']);
+                var compiler = child_process.spawn('gcc', ['-Wall', cFilePath, '-o', workingDirectory + 'c']);
 
                 compiler.stderr.on('data', function(comp_stdout) {
                    message.channel.send(comp_stdout.toString().trim());
@@ -66,7 +68,7 @@ client.on('messageReactionAdd', function(messageReaction, user) {
 
                 compiler.on('close', function(code) {
                     if (code !== 1) {
-                        currentFunction = child_process.spawn('/Users/goatgoose/W/DiscordProgrammingHelper/c');
+                        currentFunction = child_process.spawn(workingDirectory + 'c');
                         currentFunction.stdout.on('data', function (stdout) {
                             var out = stdout.toString().trim();
                             message.channel.send(out);
@@ -79,10 +81,10 @@ client.on('messageReactionAdd', function(messageReaction, user) {
                 });
 
             } else if (type === "py") {
-                var pyFilePath = '/Users/goatgoose/W/DiscordProgrammingHelper/py.py';
+                var pyFilePath = workingDirectory + 'py.py';
                 fs.writeFileSync(pyFilePath, stripped);
 
-                currentFunction = child_process.spawn('python', ['/Users/goatgoose/W/DiscordProgrammingHelper/py.py']);
+                currentFunction = child_process.spawn('python', [workingDirectory + 'py.py']);
 
                 currentFunction.stdout.on('data', function(stdout) {
                     var out = stdout.toString().trim();
