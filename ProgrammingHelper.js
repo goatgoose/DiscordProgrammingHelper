@@ -9,12 +9,15 @@ var workingDirectory = '/Users/goatgoose/W/DiscordProgrammingHelper/';
 
 var currentFunction = -1;
 
+var jsChannel = "js";
+var jsInterpreter = -1;
+
 client.on('messageReactionAdd', function(messageReaction, user) {
     var message = messageReaction.message;
     if (!message.author.bot) {
         if(message.content[0] === '`' && message.content[message.content.length - 1] === '`') {
             var stripped = message.content.slice(message.content.indexOf('\n'));
-            stripped = stripped.slice(0, stripped.indexOf('```'));
+            stripped = stripped.slice(0, stripped.indexOf('`'));
 
             var type = message.content.slice(0, message.content.indexOf('\n')).trim();
             type = type.replace(/`/g, '');
@@ -101,10 +104,54 @@ client.on('messageReactionAdd', function(messageReaction, user) {
     }
 });
 
+
+
 client.on('message', function(message) {
     if (!message.author.bot) {
-        if (currentFunction !== -1) {
-            currentFunction.stdin.write(message.content + "\n");
+        if (message.channel.name === jsChannel) { // python interpreter channel
+            var content = message.content.replace(/`/g, '');
+            var lines = content.split("\n");
+
+            if (lines[0] === "start") {
+                startJsInterpreter(message.channel);
+            } else {
+                if (jsInterpreter !== -1) {
+                    for (var line in lines) {
+                        jsInterpreter.stdin.write(lines[line] + "\n");
+                    }
+                }
+            }
+
+        } else {
+            if (currentFunction !== -1) {
+                currentFunction.stdin.write(message.content + "\n");
+            }
         }
     }
 });
+
+function startJsInterpreter(channel) {
+    if (jsInterpreter !== -1) {
+        jsInterpreter.stdin.write(".exit\n");
+    }
+    jsInterpreter = child_process.spawn('node', ['-i']);
+
+    jsInterpreter.stderr.on('data', function(stderr) {
+        var out = stderr.toString().trim();
+        channel.send(out);
+    });
+
+    jsInterpreter.stdout.on('data', function(stdout) {
+        var out = stdout.toString().trim();
+        var shouldSend = new RegExp(/\.\.\.|undefined/);
+        if (!shouldSend.test(out)) {
+            channel.send(out);
+        }
+    });
+
+    jsInterpreter.on('close', function(code) {
+        jsInterpreter = -1;
+    });
+
+    channel.send("js interpreter started");
+}
