@@ -144,11 +144,15 @@ client.on('message', function(message) {
                     startPythonInterpreter(message.channel);
                 }
             } else {
-                for (var line in lines) {
-                    pythonInterpreter.stdin.write(lines[line] + "\n");
-                }
-                if (lines.length > 1) {
-                    pythonInterpreter.stdin.write("\n");
+                if (lines[0] === "SIGINT") {
+                    pythonInterpreter.kill("SIGINT");
+                } else {
+                    for (var line in lines) {
+                        pythonInterpreter.stdin.write(lines[line] + "\n");
+                    }
+                    if (lines.length > 1) {
+                        pythonInterpreter.stdin.write("\n");
+                    }
                 }
             }
         } else {
