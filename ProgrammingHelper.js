@@ -12,9 +12,22 @@ var currentFunction = -1;
 var jsChannel = "js";
 var jsInterpreter = -1;
 
+var pythonChannel = "python";
+var pythonInterpreter = -1;
+
+process.on('unhandledRejection', function(error) {
+    console.log('unhandledRejection', error.message);
+});
+
+client.on('ready', function() {
+    console.log('discord app init');
+});
+
+
 client.on('messageReactionAdd', function(messageReaction, user) {
     var message = messageReaction.message;
     if (!message.author.bot && !user.bot) {
+        messageReaction.remove(user);
         if(message.content[0] === '`' && message.content[message.content.length - 1] === '`') {
             var stripped = message.content.slice(message.content.indexOf('\n'));
             stripped = stripped.slice(0, stripped.indexOf('`'));
@@ -122,17 +135,58 @@ client.on('message', function(message) {
                 }
             }
 
+        } else if (message.channel.name === pythonChannel) {
+            var content = message.content.replace(/`/g, '');
+            var lines = content.split("\n");
+
+            if (pythonInterpreter === -1) {
+                if (lines[0] === "start") {
+                    startPythonInterpreter(message.channel);
+                }
+            } else {
+                for (var line in lines) {
+                    pythonInterpreter.stdin.write(lines[line] + "\n");
+                }
+                if (lines.length > 1) {
+                    pythonInterpreter.stdin.write("\n");
+                }
+            }
         } else {
             if (currentFunction !== -1) {
                 currentFunction.stdin.write(message.content + "\n");
             } else {
                 if(message.content[0] === '`' && message.content[message.content.length - 1] === '`') {
-                    message.react(":clap:");
+                    message.react("▶");
                 }
             }
         }
     }
 });
+
+function startPythonInterpreter(channel) {
+    console.log("t");
+    if (pythonInterpreter !== -1) {
+        pythonInterpreter.stdin.write("exit()\n");
+    }
+    pythonInterpreter = child_process.spawn('python', ['-i']);
+
+    pythonInterpreter.stderr.on('data', function(stderr) {
+        var out = stderr.toString().trim();
+        var shouldSend = new RegExp(/>>>|\.\.\./);
+        if (!shouldSend.test(out)) {
+            channel.send(out);
+        }
+    });
+
+    pythonInterpreter.stdout.on('data', function(stdout) {
+        var out = stdout.toString().trim()
+        channel.send(out);
+    });
+
+    pythonInterpreter.on('close', function(code) {
+        pythonInterpreter = -1;
+    });
+}
 
 function startJsInterpreter(channel) {
     if (jsInterpreter !== -1) {
