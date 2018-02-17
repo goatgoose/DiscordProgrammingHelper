@@ -3,7 +3,7 @@ const client = new Discord.Client();
 const fs = require('fs');
 const child_process = require('child_process');
 
-client.login('MzAyOTI5MjcxMTU0ODAyNjg4.DRSBPA.EBz8dKfI6d9uKI0eYGHYUQDhl28');
+client.login(fs.readFileSync("token.txt", 'utf8'));
 
 var workingDirectory = '/Users/goatgoose/W/DiscordProgrammingHelper/';
 
@@ -14,7 +14,7 @@ var jsInterpreter = -1;
 
 client.on('messageReactionAdd', function(messageReaction, user) {
     var message = messageReaction.message;
-    if (!message.author.bot) {
+    if (!message.author.bot && !user.bot) {
         if(message.content[0] === '`' && message.content[message.content.length - 1] === '`') {
             var stripped = message.content.slice(message.content.indexOf('\n'));
             stripped = stripped.slice(0, stripped.indexOf('`'));
@@ -125,6 +125,10 @@ client.on('message', function(message) {
         } else {
             if (currentFunction !== -1) {
                 currentFunction.stdin.write(message.content + "\n");
+            } else {
+                if(message.content[0] === '`' && message.content[message.content.length - 1] === '`') {
+                    message.react(":clap:");
+                }
             }
         }
     }
