@@ -3,7 +3,7 @@ const client = new Discord.Client();
 const fs = require('fs');
 const child_process = require('child_process');
 
-client.login(fs.readFileSync("token.txt", 'utf8'));
+client.login(fs.readFileSync("token.txt", 'utf8').trim());
 
 var workingDirectory = '/Users/goatgoose/W/DiscordProgrammingHelper/';
 
