@@ -15,6 +15,9 @@ var jsInterpreter = -1;
 var pythonChannel = "python";
 var pythonInterpreter = -1;
 
+var shellChannel = "console";
+var shellInstance = -1;
+
 process.on('unhandledRejection', function(error) {
     console.log('unhandledRejection', error.message);
 });
@@ -155,6 +158,23 @@ client.on('message', function(message) {
                     }
                 }
             }
+        } else if (message.channel.name === shellChannel) {
+            var content = message.content.replace(/`/g, '');
+            var lines = content.split("\n");
+
+            if (shellInstance === -1) {
+                if (lines[0] === "start") {
+                    startShell(message.channel);
+                }
+            } else {
+                if (lines[0] === "SIGINT") {
+                    shellInstance.kill("SIGINT");
+                } else {
+                    for (var line in lines) {
+                        shellInstance.stdin.write(lines[line] + "\n");
+                    }
+                }
+            }
         } else {
             if (currentFunction !== -1) {
                 currentFunction.stdin.write(message.content + "\n");
@@ -167,8 +187,29 @@ client.on('message', function(message) {
     }
 });
 
+function startShell(channel) {
+    if (shellInstance !== -1) {
+        shellInstance.stdin.write("exit\n");
+    }
+
+    shellInstance = child_process.spawn('dash', ['-i']);
+
+    shellInstance.stderr.on('data', function(stderr) {
+        var out = stderr.toString().trim();
+        channel.send(out);
+    });
+
+    shellInstance.stdout.on('data', function(stdout) {
+        var out = stdout.toString().trim();
+        channel.send(out);
+    });
+
+    shellInstance.on('close', function(code) {
+        shellInstance = -1;
+    });
+}
+
 function startPythonInterpreter(channel) {
-    console.log("t");
     if (pythonInterpreter !== -1) {
         pythonInterpreter.stdin.write("exit()\n");
     }
