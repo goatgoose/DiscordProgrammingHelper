@@ -1,0 +1,22 @@
+{
+  "name": "discordprogramminghelper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ProgrammingHelper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goatgoose1142/DiscordProgrammingHelper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goatgoose1142/DiscordProgrammingHelper/issues"
+  },
+  "homepage": "https://github.com/goatgoose1142/DiscordProgrammingHelper#readme",
+  "dependencies": {
+    "discord.js": "^11.3.2"
+  }
+}

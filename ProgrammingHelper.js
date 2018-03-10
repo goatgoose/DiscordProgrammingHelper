@@ -224,7 +224,7 @@ function startPythonInterpreter(channel) {
     });
 
     pythonInterpreter.stdout.on('data', function(stdout) {
-        var out = stdout.toString().trim()
+        var out = stdout.toString().trim();
         channel.send(out);
     });
 
